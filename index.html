@@ -16,6 +16,18 @@
             --text-secondary: #64748b; /* Slate 500 */
             --border-color: #e2e8f0; /* Slate 200 */
             --accent-color: #2563eb; /* Blue 600 */
+            --control-bg: #f1f5f9; /* Slate 100 */
+            --control-text: #0f172a;
+        }
+
+        html.dark {
+            --bg-color: #0f172a; /* Slate 900 */
+            --panel-bg: #1e293b; /* Slate 800 */
+            --text-primary: #f1f5f9; /* Slate 100 */
+            --text-secondary: #94a3b8; /* Slate 400 */
+            --border-color: #334155; /* Slate 700 */
+            --control-bg: #334155; /* Slate 700 */
+            --control-text: #f1f5f9;
         }
 
         body {
@@ -24,6 +36,7 @@
             background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
             background-size: 20px 20px;
             color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
         }
         
         .app-view { display: none; }
@@ -40,6 +53,14 @@
         .view-enter { animation: fadeIn 0.4s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards; }
         .view-exit { animation: fadeOut 0.3s cubic-bezier(0.550, 0.055, 0.675, 0.190) forwards; }
 
+        .bg-panel { background-color: var(--panel-bg); }
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .border-main { border-color: var(--border-color); }
+        .bg-control { background-color: var(--control-bg); }
+        .text-control { color: var(--control-text); }
+
+
         .experiment-card {
             background-color: var(--panel-bg);
             transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
@@ -49,10 +70,13 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.07);
         }
+        html.dark .experiment-card:hover {
+             box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+        }
         .experiment-card.disabled { cursor: not-allowed; opacity: 0.6; }
         .experiment-card.disabled:hover { transform: none; box-shadow: none; }
         
-        .hint-content { max-height: 0; overflow-hidden; transition: max-height 0.4s ease-in-out; }
+        .hint-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; }
         .hint-toggle i { transition: transform 0.3s ease; }
 
         .canvas-container { position: relative; width: 100%; max-width: 500px; touch-action: none; }
@@ -64,25 +88,36 @@
             content: ''; position: absolute; background: rgba(239, 68, 68, 0.8);
             left: 50%; top: -249.5px; width: 1px; height: 500px;
         }
-        input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer;width:100%; }
-        input[type="range"]::-webkit-slider-runnable-track { background: #e2e8f0; height: 0.25rem; border-radius: 0.25rem; }
-        input[type="range"]::-moz-range-track { background: #e2e8f0; height: 0.25rem; border-radius: 0.25rem; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -0.375rem; background-color: var(--accent-color); height: 1rem; width: 1rem; border-radius: 9999px; border:2px solid white; box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
+        input, select {
+            background-color: var(--control-bg);
+            color: var(--control-text);
+            border: 1px solid var(--border-color);
+        }
+        input[type="range"] { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer;width:100%; border: none;}
+        input[type="range"]::-webkit-slider-runnable-track { background: var(--border-color); height: 0.25rem; border-radius: 0.25rem; }
+        input[type="range"]::-moz-range-track { background: var(--border-color); height: 0.25rem; border-radius: 0.25rem; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -0.375rem; background-color: var(--accent-color); height: 1rem; width: 1rem; border-radius: 9999px; border:2px solid var(--panel-bg); box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
         input[type="range"]::-moz-range-thumb { border: none; border-radius: 9999px; background-color: var(--accent-color); height: 1rem; width: 1rem; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="p-4">
 
-    <div class="w-full max-w-7xl mx-auto">
+    <div class="w-full max-w-7xl mx-auto min-h-screen">
+        <!-- Main Menu View -->
         <div id="menu-view" class="app-view active view-enter">
-            <header class="text-center mb-10">
-                <h1 class="text-5xl font-bold tracking-tight text-slate-800">Virtual Physics Lab</h1>
-                <p class="text-lg text-slate-500 mt-2">Choose an experiment to simulate</p>
+            <header class="text-center mb-10 relative">
+                <h1 class="text-5xl font-bold tracking-tight text-primary">Virtual Physics Lab</h1>
+                <p class="text-lg text-secondary mt-2">Choose an experiment to simulate</p>
+                 <button id="theme-toggle-btn" class="absolute top-0 right-0 p-2 rounded-full bg-control hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                    <i id="theme-icon" class="ph ph-moon text-2xl text-primary"></i>
+                </button>
             </header>
             <main id="main-menu-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                </main>
+                <!-- Experiment cards are injected by JavaScript -->
+            </main>
         </div>
 
+        <!-- VIEWS FOR EACH EXPERIMENT (Injected by JS) -->
         <div id="newtons-rings-view" class="app-view"></div>
         <div id="fresnels-biprism-view" class="app-view"></div>
         <div id="polarimeter-view" class="app-view"></div>
@@ -93,8 +128,34 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- CORE APP LOGIC (SINGLE-PAGE APPLICATION FRAMEWORK) ---
+            // --- THEME SWITCHER LOGIC ---
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const themeIcon = document.getElementById('theme-icon');
+            const htmlEl = document.documentElement;
+
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    htmlEl.classList.add('dark');
+                    themeIcon.classList.remove('ph-moon');
+                    themeIcon.classList.add('ph-sun');
+                } else {
+                    htmlEl.classList.remove('dark');
+                    themeIcon.classList.remove('ph-sun');
+                    themeIcon.classList.add('ph-moon');
+                }
+            };
             
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(savedTheme);
+
+            themeToggleBtn.addEventListener('click', () => {
+                const newTheme = htmlEl.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
+
+
+            // --- CORE APP LOGIC (SINGLE-PAGE APPLICATION FRAMEWORK) ---
             const App = {
                 views: {},
                 currentView: 'menu-view',
@@ -136,7 +197,7 @@
                     menuGrid.innerHTML = experiments.map(exp => `
                         <div data-experiment="${exp.id}" class="experiment-card p-6 rounded-xl flex flex-col items-center text-center ${exp.disabled ? 'disabled' : 'cursor-pointer'}">
                             <i class="ph-fill ${exp.icon} text-5xl ${exp.color}"></i>
-                            <h2 class="text-lg font-semibold mt-4">${exp.name}</h2>
+                            <h2 class="text-lg font-semibold mt-4 text-primary">${exp.name}</h2>
                             <p class="text-sm text-secondary mt-1">${exp.desc}</p>
                         </div>
                     `).join('');
@@ -144,7 +205,6 @@
 
                 setupEventListeners() {
                     document.body.addEventListener('click', (event) => {
-                        // Experiment card click
                         const card = event.target.closest('.experiment-card');
                         if (card && !card.classList.contains('disabled')) {
                             const experimentId = card.dataset.experiment;
@@ -165,9 +225,7 @@
                                 view.dataset.initialized = 'true';
                             }
                         }
-                        // Back button click
                         if (event.target.closest('.back-to-menu-btn')) { this.showView('menu-view'); }
-                        // Hint toggle click
                         const hintToggle = event.target.closest('.hint-toggle');
                         if (hintToggle) {
                             const content = hintToggle.nextElementSibling;
@@ -193,7 +251,7 @@
                     const moveHandler = (e) => {
                         if (!isDragging) return;
                         const event = e.touches ? e.touches[0] : e;
-                        const rect = el.closest('.canvas-container').getBoundingClientRect();
+                        const rect = el.closest('.canvas-container, .bridge-container').getBoundingClientRect();
                         let value;
                         if (dir === 'y') {
                             value = event.clientY - rect.top;
@@ -202,14 +260,10 @@
                         }
                         onDrag(Math.max(0, Math.min(dir === 'y' ? rect.height : rect.width, value)));
                     };
-                    const endDrag = () => { isDragging = false; };
-
-                    el.addEventListener('mousedown', (e) => { isDragging = true; e.preventDefault(); });
-                    el.addEventListener('touchstart', (e) => { isDragging = true; e.preventDefault(); });
-                    document.addEventListener('mousemove', moveHandler);
-                    document.addEventListener('touchmove', moveHandler);
-                    document.addEventListener('mouseup', endDrag);
-                    document.addEventListener('touchend', endDrag);
+                    const endDrag = () => { isDragging = false; document.removeEventListener('mousemove', moveHandler); document.removeEventListener('touchmove', moveHandler); document.removeEventListener('mouseup', endDrag); document.removeEventListener('touchend', endDrag);};
+                    const startDrag = (e) => { isDragging = true; e.preventDefault(); document.addEventListener('mousemove', moveHandler); document.addEventListener('touchmove', moveHandler); document.addEventListener('mouseup', endDrag); document.addEventListener('touchend', endDrag); };
+                    el.addEventListener('mousedown', startDrag);
+                    el.addEventListener('touchstart', startDrag);
                 }
             };
 
@@ -217,18 +271,18 @@
 
             // 1. Newton's Rings
             templates['newtons-rings'] = `
-                <div class="bg-white text-slate-800 p-6 sm:p-8 rounded-2xl shadow-lg">
-                    <header class="flex items-center justify-between pb-4 border-b border-slate-200"><h1 class="text-2xl font-bold">Newton's Rings</h1><button class="back-to-menu-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
+                <div class="bg-panel text-primary p-6 sm:p-8 rounded-2xl shadow-lg">
+                    <header class="flex items-center justify-between pb-4 border-b border-main"><h1 class="text-2xl font-bold">Newton's Rings</h1><button class="back-to-menu-btn bg-control hover:bg-slate-200 dark:hover:bg-slate-600 text-control font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
                     <div class="flex flex-col xl:flex-row gap-8 mt-6">
                         <div class="w-full xl:w-[450px] flex-shrink-0">
-                            <div class="border rounded-lg mb-4"><button class="hint-toggle w-full p-3 font-bold text-slate-700 flex justify-between items-center"><span>Procedure & Hints</span><i class="ph-caret-down"></i></button><div class="hint-content"><div class="p-3 border-t text-sm text-slate-600"><strong>1. Take Readings:</strong> Move the red crosshair with your mouse/finger. Place it tangentially on a dark ring (e.g., the 10th). Click "Record Diameter". Repeat for other rings (e.g., 8th, 6th...).<br><strong>2. Calculate:</strong> With at least two readings, click "Calculate λ". The formula D²(n+p) - D²(n) / 4pR is used, where (n+p) and n are the highest and lowest recorded ring numbers.</div></div></div>
-                            <h3 class="font-bold text-slate-600 mb-2">Apparatus</h3><div class="p-4 bg-slate-100 rounded-lg mb-4 flex justify-center"><svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto max-h-48"><style>.txt{font-family:monospace;font-size:10px;fill:#0f172a;}.arr{marker-end:url(#arrowhead);}</style><defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f59e0b"/></marker></defs><rect x="10" y="80" width="30" height="40" fill="#fef08a" stroke="#ca8a04"/><text x="25" y="105" class="txt" text-anchor="middle">S</text><path d="M45 90 L 125 90" stroke="#f59e0b" stroke-width="1.5" class="arr"/><path d="M45 110 L 125 110" stroke="#f59e0b" stroke-width="1.5" class="arr"/><rect x="125" y="65" width="10" height="70" transform="rotate(45 130 100)" fill="#a5f3fc" stroke="#0891b2" opacity="0.7"/><text x="145" y="80" class="txt">G</text><path d="M140 120 L 140 160" stroke="#f59e0b" stroke-width="1.5" class="arr" transform="rotate(90 140 120)"/><path d="M 110 180 Q 150 160 190 180" stroke="#0f172a" stroke-width="1.5" fill="none"/><rect x="110" y="180" width="80" height="5" stroke="#0f172a" stroke-width="1.5" fill="#e2e8f0"/><text x="150" y="155" class="txt" text-anchor="middle">L & P</text><path d="M150 160 L 150 40" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 3"/><rect x="140" y="10" width="20" height="30" fill="#94a3b8" stroke="#0f172a"/><circle cx="150" cy="45" r="5" stroke="#0f172a" fill="none"/><path d="M145 10 L 135 0 M155 10 L 165 0" stroke="#0f172a" fill="none"/><text x="170" y="25" class="txt">Microscope</text></svg></div>
-                            <h3 class="font-bold text-slate-600 mb-2">Measurements</h3>
-                            <div class="h-48 overflow-y-auto border rounded-lg bg-white mb-4"><table class="w-full text-sm text-left"><thead class="bg-slate-100 sticky top-0"><tr class="text-slate-600"><th class="p-2">Ring (n)</th><th class="p-2">Dₙ (μm)</th><th class="p-2">Dₙ² (mm²)</th><th class="p-2"></th></tr></thead><tbody id="newton-readings"></tbody></table></div>
+                            <div class="border border-main rounded-lg mb-4"><button class="hint-toggle w-full p-3 font-bold flex justify-between items-center"><span>Procedure & Hints</span><i class="ph-caret-down"></i></button><div class="hint-content"><div class="p-3 border-t border-main text-sm text-secondary"><strong>1. Take Readings:</strong> Move the red crosshair with your mouse/finger. Place it tangentially on a dark ring (e.g., the 10th). Click "Record Diameter". Repeat for other rings (e.g., 8th, 6th...).<br><strong>2. Calculate:</strong> With at least two readings, click "Calculate λ". The formula D²(n+p) - D²(n) / 4pR is used, where (n+p) and n are the highest and lowest recorded ring numbers.</div></div></div>
+                            <h3 class="font-bold text-secondary mb-2">Apparatus</h3><div class="p-4 bg-control rounded-lg mb-4 flex justify-center"><svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto max-h-48"><style>.txt{font-family:monospace;font-size:10px;fill:var(--text-primary);}.arr{marker-end:url(#arrowhead);}</style><defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#f59e0b"/></marker></defs><rect x="10" y="80" width="30" height="40" fill="#fef08a" stroke="#ca8a04"/><text x="25" y="105" class="txt" text-anchor="middle">S</text><path d="M45 90 L 125 90" stroke="#f59e0b" stroke-width="1.5" class="arr"/><path d="M45 110 L 125 110" stroke="#f59e0b" stroke-width="1.5" class="arr"/><rect x="125" y="65" width="10" height="70" transform="rotate(45 130 100)" fill="#a5f3fc" stroke="#0891b2" opacity="0.7"/><text x="145" y="80" class="txt">G</text><path d="M140 120 L 140 160" stroke="#f59e0b" stroke-width="1.5" class="arr" transform="rotate(90 140 120)"/><path d="M 110 180 Q 150 160 190 180" stroke="var(--text-primary)" stroke-width="1.5" fill="none"/><rect x="110" y="180" width="80" height="5" stroke="var(--text-primary)" stroke-width="1.5" fill="var(--border-color)"/><text x="150" y="155" class="txt" text-anchor="middle">L & P</text><path d="M150 160 L 150 40" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3 3"/><rect x="140" y="10" width="20" height="30" fill="#94a3b8" stroke="var(--text-primary)"/><circle cx="150" cy="45" r="5" stroke="var(--text-primary)" fill="none"/><path d="M145 10 L 135 0 M155 10 L 165 0" stroke="var(--text-primary)" fill="none"/><text x="170" y="25" class="txt">Microscope</text></svg></div>
+                            <h3 class="font-bold text-secondary mb-2">Measurements</h3>
+                            <div class="h-48 overflow-y-auto border border-main rounded-lg bg-panel mb-4"><table class="w-full text-sm text-left"><thead class="bg-control sticky top-0"><tr class="text-secondary"><th class="p-2">Ring (n)</th><th class="p-2">Dₙ (μm)</th><th class="p-2">Dₙ² (mm²)</th><th class="p-2"></th></tr></thead><tbody id="newton-readings"></tbody></table></div>
                             <div class="flex gap-4"><button id="calculate-lambda-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" disabled>Calculate λ</button><button id="clear-readings-btn" class="w-full bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg hover:bg-slate-300">Clear</button></div>
                             <div id="newton-result" class="mt-4 text-center font-semibold text-lg"></div>
                         </div>
-                        <div class="flex-1 min-w-0"><div class="flex flex-col lg:flex-row gap-8"><div class="flex-1 flex flex-col items-center"><h3 class="font-bold text-slate-600 mb-2 text-center">Microscope View</h3><div class="canvas-container"><canvas id="newtonCanvas" width="500" height="500" class="rounded-full bg-black cursor-pointer"></canvas><div id="newtonCrosshair" class="crosshair"></div></div><div class="flex items-center gap-4 mt-4"><input id="ring-number-input" type="number" min="1" max="20" value="10" class="w-20 p-2 border rounded-md text-center"><button id="record-newton-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Record Ring</button></div><p id="newton-diameter-display" class="mt-2 font-mono text-slate-600"></p></div><div class="w-full lg:w-[300px] bg-slate-50 p-6 rounded-xl border"><h3 class="font-bold text-slate-700 mb-6">Parameters</h3><div class="mb-6"><label class="flex justify-between items-center text-sm font-medium text-slate-600 mb-2"><span>Wavelength (λ)</span><span id="wavelength-val" class="font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded">589 nm</span></label><input id="wavelength" type="range" min="400" max="700" value="589"></div><div class="mb-6"><label class="flex justify-between items-center text-sm font-medium text-slate-600 mb-2"><span>Lens Radius (R)</span><span id="radius-val" class="font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded">1.0 m</span></label><input id="radius" type="range" min="0.5" max="5" value="1.0" step="0.1"></div><div><label class="flex justify-between items-center text-sm font-medium text-slate-600 mb-2"><span>Refractive Index (μ)</span><span id="n-val" class="font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded">1.00</span></label><input id="refractiveIndex" type="range" min="1.00" max="2.00" value="1.00" step="0.01"></div></div></div></div>
+                        <div class="flex-1 min-w-0"><div class="flex flex-col lg:flex-row gap-8"><div class="flex-1 flex flex-col items-center"><h3 class="font-bold text-secondary mb-2 text-center">Microscope View</h3><div class="canvas-container"><canvas id="newtonCanvas" width="500" height="500" class="rounded-full bg-black cursor-pointer"></canvas><div id="newtonCrosshair" class="crosshair"></div></div><div class="flex items-center gap-4 mt-4"><input id="ring-number-input" type="number" min="1" max="20" value="10" class="w-20 p-2 rounded-md text-center"><button id="record-newton-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Record Ring</button></div><p id="newton-diameter-display" class="mt-2 font-mono text-secondary"></p></div><div class="w-full lg:w-[300px] bg-control p-6 rounded-xl border border-main"><h3 class="font-bold text-primary mb-6">Parameters</h3><div class="mb-6"><label class="flex justify-between items-center text-sm font-medium text-secondary mb-2"><span>Wavelength (λ)</span><span id="wavelength-val" class="font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 px-2 py-1 rounded">589 nm</span></label><input id="wavelength" type="range" min="400" max="700" value="589"></div><div class="mb-6"><label class="flex justify-between items-center text-sm font-medium text-secondary mb-2"><span>Lens Radius (R)</span><span id="radius-val" class="font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 px-2 py-1 rounded">1.0 m</span></label><input id="radius" type="range" min="0.5" max="5" value="1.0" step="0.1"></div><div><label class="flex justify-between items-center text-sm font-medium text-secondary mb-2"><span>Refractive Index (μ)</span><span id="n-val" class="font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 px-2 py-1 rounded">1.00</span></label><input id="refractiveIndex" type="range" min="1.00" max="2.00" value="1.00" step="0.01"></div></div></div></div>
                     </div>
                 </div>`;
             initFunctions.initNewtonsrings = function(view) {
@@ -237,8 +291,8 @@
                 function draw(){const l=parseFloat(wS.value)*1e-9,R=parseFloat(rS.value),mu=parseFloat(nS.value);wV.textContent=`${wS.value} nm`;rV.textContent=`${R.toFixed(1)} m`;nV.textContent=mu.toFixed(2);const rgb=sharedUtils.wavelengthToHSL(parseFloat(wS.value));ctx.fillStyle='black';ctx.fillRect(0,0,w,h);for(let r_px=Math.min(cX,cY);r_px>=0;r_px--){const r_m=r_px/sc,t=(r_m*r_m)/(2*R),pD=(2*Math.PI/l)*(2*mu*t)+Math.PI,i=(1+Math.cos(pD))/2;ctx.beginPath();ctx.strokeStyle=`rgba(${rgb.r},${rgb.g},${rgb.b},${i})`;ctx.lineWidth=1.5;ctx.arc(cX,cY,r_px,0,2*Math.PI);ctx.stroke();}}
                 function updateCH(y){const r_px=Math.abs(y-cY),d_um=(2*r_px/sc)*1e6;cH.style.top=`${y}px`;dD.textContent=`Diameter = ${d_um.toFixed(0)} µm`;}
                 function deleteReading(n){readings=readings.filter(r=>r.n!==n);updateTable();}
-                function updateTable(){readings.sort((a,b)=>b.n-a.n);rBody.innerHTML=readings.map(r=>`<tr><td class="p-2 font-mono">${r.n}</td><td class="p-2 font-mono">${(Math.sqrt(r.d_sq)*1000).toFixed(0)}</td><td class="p-2 font-mono">${r.d_sq.toFixed(4)}</td><td class="p-2"><button data-n="${r.n}" class="delete-reading-btn text-red-500 hover:text-red-700">&times;</button></td></tr>`).join('');calcB.disabled=readings.length<2;const deleteBtns=rBody.querySelectorAll('.delete-reading-btn');deleteBtns.forEach(btn=>btn.addEventListener('click',()=>deleteReading(parseInt(btn.dataset.n))));}
-                recB.addEventListener('click',()=>{const n=parseInt(ringNumInput.value);if(!n||n<1||readings.find(r=>r.n===n)){alert('Please enter a valid, unique ring number.');return;}const tS=cH.style.top||`${cY}px`,r_px=Math.abs(parseFloat(tS)-cY),d_m=(2*r_px/sc),d_sq_mm=(d_m*1e3)**2;readings.push({n,d_sq:d_sq_mm});updateTable();});
+                function updateTable(){readings.sort((a,b)=>b.n-a.n);rBody.innerHTML=readings.map(r=>`<tr><td class="p-2 font-mono">${r.n}</td><td class="p-2 font-mono">${(Math.sqrt(r.d_sq)*1000).toFixed(0)}</td><td class="p-2 font-mono">${r.d_sq.toFixed(4)}</td><td class="p-2"><button data-n="${r.n}" class="delete-reading-btn text-red-500 hover:text-red-700 font-bold text-lg leading-none">&times;</button></td></tr>`).join('');calcB.disabled=readings.length<2;const deleteBtns=rBody.querySelectorAll('.delete-reading-btn');deleteBtns.forEach(btn=>btn.addEventListener('click',()=>deleteReading(parseInt(btn.dataset.n))));}
+                recB.addEventListener('click',()=>{const n=parseInt(ringNumInput.value);if(!n||n<1||readings.find(r=>r.n===n)){return;}const tS=cH.style.top||`${cY}px`,r_px=Math.abs(parseFloat(tS)-cY),d_m=(2*r_px/sc),d_sq_mm=(d_m*1e3)**2;readings.push({n,d_sq:d_sq_mm});updateTable();});
                 clrB.addEventListener('click',()=>{readings=[];updateTable();resD.innerHTML='';});
                 calcB.addEventListener('click',()=>{if(readings.length<2){resD.innerHTML=`<span class="text-red-500">Need at least 2 readings.</span>`;return;}const last=readings[0],first=readings[readings.length-1],p=last.n-first.n;if(p<=0){resD.innerHTML=`<span class="text-red-500">Invalid ring selection for calculation.</span>`;return;}const d_diff_sq_m=(last.d_sq-first.d_sq)/1e6,R=parseFloat(rS.value),cL=d_diff_sq_m/(4*p*R),cL_nm=cL*1e9;resD.innerHTML=`Calculated λ: <span class="text-blue-600">${cL_nm.toFixed(1)} nm</span>`;});
                 [wS,rS,nS].forEach(s=>s.addEventListener('input',draw));sharedUtils.makeDraggable(cH,updateCH,'y');draw();updateCH(cY);
@@ -246,35 +300,32 @@
 
             // 2. Fresnel's Biprism
             templates['fresnels-biprism'] = `
-                <div class="bg-white text-slate-800 p-6 sm:p-8 rounded-2xl shadow-lg">
-                    <header class="flex items-center justify-between pb-4 border-b border-slate-200"><h1 class="text-2xl font-bold">Fresnel's Bi-Prism</h1><button class="back-to-menu-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
+                <div class="bg-panel text-primary p-6 sm:p-8 rounded-2xl shadow-lg">
+                    <header class="flex items-center justify-between pb-4 border-b border-main"><h1 class="text-2xl font-bold">Fresnel's Bi-Prism</h1><button class="back-to-menu-btn bg-control hover:bg-slate-200 dark:hover:bg-slate-600 text-control font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-6">
                         <div class="flex flex-col items-center">
-                            <h3 id="biprism-view-title" class="font-bold text-slate-600 mb-2 text-center">Fringe View (Measure β)</h3>
-                            <div class="canvas-container"><canvas id="biprismCanvas" width="500" height="500" class="bg-black cursor-pointer"></canvas><div id="biprismCrosshair" class="crosshair" style="top:50%;left:50%;height:500px;width:1px;background:rgba(239, 68, 68, 0.8);cursor:ew-resize;"><div style="content:'';position:absolute;background:rgba(239,68,68,0.8);left:-249.5px;top:50%;width:500px;height:1px;"></div></div></div>
-                            <p id="biprism-micrometer-display" class="mt-2 font-mono text-slate-600">Position = 2.500 mm</p>
+                            <h3 id="biprism-view-title" class="font-bold text-secondary mb-2 text-center">Fringe View (Measure β)</h3>
+                            <div class="canvas-container"><canvas id="biprismCanvas" width="500" height="500" class="bg-black cursor-pointer rounded-lg"></canvas><div id="biprismCrosshair" class="crosshair" style="top:50%;left:50%;height:500px;width:1px;background:rgba(239, 68, 68, 0.8);cursor:ew-resize;"><div style="content:'';position:absolute;background:rgba(239,68,68,0.8);left:-249.5px;top:50%;width:500px;height:1px;"></div></div></div>
+                            <p id="biprism-micrometer-display" class="mt-2 font-mono text-secondary">Position = 2.500 mm</p>
                         </div>
                         <div>
-                            <div class="border rounded-lg mb-4"><button class="hint-toggle w-full p-3 font-bold text-slate-700 flex justify-between items-center"><span>Procedure & Hints</span><i class="ph-caret-down"></i></button><div class="hint-content"><div class="p-3 border-t text-sm text-slate-600"><strong>1. Measure β:</strong> In "Fringe View", move the crosshair over several bright fringes and record their positions. Calculate the fringe width (β = Total Distance / No. of Fringes).<br><strong>2. Measure d:</strong> Switch to "Lens View". Two sets of images (d₁ and d₂) for the virtual sources will be shown. Measure their separations.<br><strong>3. Calculate λ:</strong> Use the formula λ = (β * √d₁d₂) / D.</div></div></div>
-                            <div class="bg-slate-50 p-4 rounded-xl border mb-4">
-                                <h3 class="font-bold text-slate-700 mb-4">Parameters</h3>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div><label class="block text-sm font-medium text-slate-600 mb-1">Wavelength (λ)</label><input id="biprism-lambda" type="number" value="589" class="w-full p-2 border rounded-md"></div>
-                                    <div><label class="block text-sm font-medium text-slate-600 mb-1">Slit-Screen (D)</label><input id="biprism-D" type="number" value="100" class="w-full p-2 border rounded-md"></div>
-                                    <div><label class="block text-sm font-medium text-slate-600 mb-1">Source Sep. (d)</label><input id="biprism-d" type="number" value="0.5" step="0.01" class="w-full p-2 border rounded-md"></div>
-                                    <div><label class="block text-sm font-medium text-slate-600 mb-1">Focal Length (f)</label><input id="biprism-f" type="number" value="20" class="w-full p-2 border rounded-md"></div>
+                            <div class="border border-main rounded-lg mb-4"><button class="hint-toggle w-full p-3 font-bold flex justify-between items-center"><span>Procedure & Hints</span><i class="ph-caret-down"></i></button><div class="hint-content"><div class="p-3 border-t border-main text-sm text-secondary"><strong>1. Measure β:</strong> In "Fringe View", move the crosshair over several bright fringes and record their positions. Calculate the fringe width (β = Total Distance / No. of Fringes).<br><strong>2. Measure d:</strong> Switch to "Lens View". Two sets of images (d₁ and d₂) for the virtual sources will be shown. Measure their separations.<br><strong>3. Calculate λ:</strong> Use the formula λ = (β * √d₁d₂) / D.</div></div></div>
+                            <div class="bg-control p-4 rounded-xl border border-main mb-4">
+                                <h3 class="font-bold text-primary mb-4">Parameters</h3>
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div><label class="font-medium text-secondary mb-1 block">Wavelength (λ nm)</label><input id="biprism-lambda" type="number" value="589" class="w-full p-2 rounded-md"></div>
+                                    <div><label class="font-medium text-secondary mb-1 block">Slit-Screen (D cm)</label><input id="biprism-D" type="number" value="100" class="w-full p-2 rounded-md"></div>
+                                    <div><label class="font-medium text-secondary mb-1 block">Source Sep. (d mm)</label><input id="biprism-d" type="number" value="0.5" step="0.01" class="w-full p-2 rounded-md"></div>
+                                    <div><label class="font-medium text-secondary mb-1 block">Focal Length (f cm)</label><input id="biprism-f" type="number" value="20" class="w-full p-2 rounded-md"></div>
                                 </div>
                             </div>
-                            <div class="flex gap-4 mb-4">
-                                <button id="biprism-mode-btn" class="flex-1 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">Switch to Lens View</button>
-                                <button id="biprism-record-btn" class="flex-1 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Record Position</button>
-                            </div>
-                            <div class="h-32 overflow-y-auto border rounded-lg bg-white mb-4"><table class="w-full text-sm text-left"><thead class="bg-slate-100 sticky top-0"><tr class="text-slate-600"><th class="p-2">Measurement</th><th class="p-2">Value (mm)</th></tr></thead><tbody id="biprism-readings"></tbody></table></div>
-                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                               <h3 class="font-bold text-slate-700 mb-2">Calculations</h3>
+                            <div class="flex gap-4 mb-4"><button id="biprism-mode-btn" class="flex-1 bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg hover:bg-slate-300">Switch to Lens View</button><button id="biprism-record-btn" class="flex-1 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Record Position</button></div>
+                            <div class="h-32 overflow-y-auto border border-main rounded-lg bg-panel mb-4"><table class="w-full text-sm text-left"><thead class="bg-control sticky top-0"><tr class="text-secondary"><th class="p-2">Measurement</th><th class="p-2">Value (mm)</th></tr></thead><tbody id="biprism-readings"></tbody></table></div>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                               <h3 class="font-bold text-primary mb-2">Calculations</h3>
                                <div class="grid grid-cols-3 gap-2 text-sm items-center">
-                                 <span>Fringe Width β:</span> <input id="biprism-beta-in" placeholder="mm" class="col-span-2 p-1 border rounded-md">
-                                 <span>d = √d₁d₂:</span> <input id="biprism-d-in" placeholder="mm" class="col-span-2 p-1 border rounded-md">
+                                 <span class="text-secondary">Fringe Width β (mm)</span> <input id="biprism-beta-in" placeholder="e.g., 0.589" class="col-span-2 p-1 rounded-md">
+                                 <span class="text-secondary">d = √d₁d₂ (mm)</span> <input id="biprism-d-in" placeholder="e.g., 0.5" class="col-span-2 p-1 rounded-md">
                                </div>
                                <button id="biprism-calculate-btn" class="w-full mt-3 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Calculate λ</button>
                                <p id="biprism-result" class="mt-2 text-center font-semibold text-lg"></p>
@@ -294,42 +345,26 @@
                     const rgb = sharedUtils.wavelengthToHSL(parseFloat(lambdaIn.value));
 
                     if (mode === 'fringes') {
-                        const beta = (lambda * D) / d; // fringe width in meters
-                        const beta_px = beta * 200000; // scale to pixels
-                        for (let x = -beta_px*10; x < w + beta_px*10; x += beta_px) {
-                            const intensity = Math.cos((Math.PI*(x-cX))/beta_px)**2;
-                            const grd = ctx.createLinearGradient(x - beta_px/2, 0, x + beta_px/2, 0);
-                            grd.addColorStop(0, `rgba(${rgb.r},${rgb.g},${rgb.b},0)`);
-                            grd.addColorStop(0.5, `rgba(${rgb.r},${rgb.g},${rgb.b},${intensity})`);
-                            grd.addColorStop(1, `rgba(${rgb.r},${rgb.g},${rgb.b},0)`);
-                            ctx.fillStyle = grd;
-                            ctx.fillRect(x - beta_px/2, 0, beta_px, h);
+                        const beta = (lambda * D) / d;
+                        const beta_px = beta * 200000;
+                        for (let x_px = 0; x_px < w; x_px++) {
+                            const intensity = Math.cos(Math.PI * (x_px - cX) / beta_px)**2;
+                            ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},${intensity})`;
+                            ctx.beginPath(); ctx.moveTo(x_px, 0); ctx.lineTo(x_px, h); ctx.stroke();
                         }
                     } else { // Lens mode
                         if (D <= 4 * f) {
                             ctx.fillStyle = 'white'; ctx.font = '16px Inter'; ctx.textAlign = 'center';
                             ctx.fillText('D must be > 4f to get two images.', w/2, h/2); return;
                         }
-                        const u1 = (D/2) + Math.sqrt((D/2)**2 - D*f);
-                        const v1 = D - u1;
-                        const m1 = v1 / u1;
-                        const d1 = m1 * d;
-                        const d1_px = d1 * 200000;
-                        const u2 = (D/2) - Math.sqrt((D/2)**2 - D*f);
-                        const v2 = D - u2;
-                        const m2 = v2 / u2;
-                        const d2 = m2 * d;
-                        const d2_px = d2 * 200000;
-                        // Draw d1
+                        const u1 = (D/2) + Math.sqrt((D/2)**2 - D*f); const v1 = D - u1; const m1 = v1 / u1; const d1 = m1 * d; const d1_px = d1 * 200000;
+                        const u2 = (D/2) - Math.sqrt((D/2)**2 - D*f); const v2 = D - u2; const m2 = v2 / u2; const d2 = m2 * d; const d2_px = d2 * 200000;
                         ctx.fillStyle=`rgba(${rgb.r},${rgb.g},${rgb.b},0.8)`;
-                        ctx.fillRect(cX-d1_px/2-2, h/4-25, 4, 50);
-                        ctx.fillRect(cX+d1_px/2-2, h/4-25, 4, 50);
+                        ctx.fillRect(cX-d1_px/2-2, h/4-25, 4, 50); ctx.fillRect(cX+d1_px/2-2, h/4-25, 4, 50);
                         ctx.strokeStyle='white'; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(cX-d1_px/2, h/4+35); ctx.lineTo(cX+d1_px/2, h/4+35); ctx.stroke();
                         ctx.fillStyle='white'; ctx.font='14px Inter'; ctx.fillText(`d₁ = ${(d1*1000).toFixed(3)} mm`, cX, h/4+50);
-                        // Draw d2
                         ctx.fillStyle=`rgba(${rgb.r},${rgb.g},${rgb.b},0.8)`;
-                        ctx.fillRect(cX-d2_px/2-2, 3*h/4-25, 4, 50);
-                        ctx.fillRect(cX+d2_px/2-2, 3*h/4-25, 4, 50);
+                        ctx.fillRect(cX-d2_px/2-2, 3*h/4-25, 4, 50); ctx.fillRect(cX+d2_px/2-2, 3*h/4-25, 4, 50);
                         ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.moveTo(cX-d2_px/2, 3*h/4+35); ctx.lineTo(cX+d2_px/2, 3*h/4+35); ctx.stroke();
                         ctx.fillText(`d₂ = ${(d2*1000).toFixed(3)} mm`, cX, 3*h/4+50);
                         ctx.setLineDash([]);
@@ -345,61 +380,46 @@
 
              // 3. Polarimeter
             templates['polarimeter'] = `
-                <div class="bg-white text-slate-800 p-6 sm:p-8 rounded-2xl shadow-lg">
-                    <header class="flex items-center justify-between pb-4 border-b border-slate-200"><h1 class="text-2xl font-bold">Polarimeter</h1><button class="back-to-menu-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
+                <div class="bg-panel text-primary p-6 sm:p-8 rounded-2xl shadow-lg">
+                    <header class="flex items-center justify-between pb-4 border-b border-main"><h1 class="text-2xl font-bold">Polarimeter</h1><button class="back-to-menu-btn bg-control hover:bg-slate-200 dark:hover:bg-slate-600 text-control font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-6">
                         <div class="flex flex-col items-center">
-                            <h3 class="font-bold text-slate-600 mb-2 text-center">Eyepiece View</h3>
-                            <div class="canvas-container"><canvas id="polarimeterCanvas" width="300" height="300" class="rounded-full bg-gray-800 border-8 border-gray-700"></canvas></div>
+                            <h3 class="font-bold text-secondary mb-2 text-center">Eyepiece View</h3>
+                            <div class="canvas-container"><canvas id="polarimeterCanvas" width="300" height="300" class="rounded-full bg-gray-800 border-8 border-gray-700 dark:border-slate-900"></canvas></div>
                             <div class="w-full max-w-sm mt-4">
-                                <label class="flex justify-between items-center text-lg font-medium text-slate-600 mb-2">
-                                    <span>Analyzer Angle (θ)</span><span id="angle-display" class="font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded">0.0°</span>
+                                <label class="flex justify-between items-center text-lg font-medium text-secondary mb-2">
+                                    <span>Analyzer Angle (θ)</span><span id="angle-display" class="font-bold text-indigo-600 bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-300 px-2 py-1 rounded">0.0°</span>
                                 </label>
                                 <input id="analyzer-angle" type="range" min="-45" max="45" value="0" step="0.1">
                             </div>
                         </div>
                         <div>
-                            <div class="border rounded-lg mb-4"><button class="hint-toggle w-full p-3 font-bold text-slate-700 flex justify-between items-center"><span>Procedure & Hints</span><i class="ph-caret-down"></i></button><div class="hint-content"><div class="p-3 border-t text-sm text-slate-600"><strong>1. Set Concentration:</strong> Use the slider to prepare a sugar solution.<br><strong>2. Find Null Point:</strong> Adjust the "Analyzer Angle" slider until the two halves of the circle in the eyepiece match in color (a uniform grayish tint).<br><strong>3. Record & Repeat:</strong> Click "Record Angle" and repeat for different concentrations.<br><strong>4. Calculate S:</strong> Use the formula S = θ / (l * c) with your recorded data. The tube length (l) is fixed at 2 dm.</div></div></div>
-                             <div class="bg-slate-50 p-4 rounded-xl border mb-4">
-                                <h3 class="font-bold text-slate-700 mb-4">Solution Preparation</h3>
-                                <label class="flex justify-between items-center text-sm font-medium text-slate-600 mb-2">
-                                    <span>Concentration (c)</span><span id="concentration-val" class="font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded">0.10 g/mL</span>
+                            <div class="border border-main rounded-lg mb-4"><button class="hint-toggle w-full p-3 font-bold flex justify-between items-center"><span>Procedure & Hints</span><i class="ph-caret-down"></i></button><div class="hint-content"><div class="p-3 border-t border-main text-sm text-secondary"><strong>1. Set Concentration:</strong> Use the slider to prepare a sugar solution.<br><strong>2. Find Null Point:</strong> Adjust the "Analyzer Angle" slider until the two halves of the circle in the eyepiece match in color (a uniform grayish tint).<br><strong>3. Record & Repeat:</strong> Click "Record Angle" and repeat for different concentrations.<br><strong>4. Calculate S:</strong> Use the formula S = θ / (l * c) with your recorded data. The tube length (l) is fixed at 2 dm.</div></div></div>
+                             <div class="bg-control p-4 rounded-xl border border-main mb-4">
+                                <h3 class="font-bold text-primary mb-4">Solution Preparation</h3>
+                                <label class="flex justify-between items-center text-sm font-medium text-secondary mb-2">
+                                    <span>Concentration (c)</span><span id="concentration-val" class="font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900 dark:text-emerald-300 px-2 py-1 rounded">0.10 g/mL</span>
                                 </label>
                                 <input id="concentration-slider" type="range" min="0" max="0.5" value="0.1" step="0.01">
                             </div>
                             <button id="polarimeter-record-btn" class="w-full mb-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Record Angle</button>
-                            <div class="h-40 overflow-y-auto border rounded-lg bg-white mb-4"><table class="w-full text-sm text-left"><thead class="bg-slate-100 sticky top-0"><tr class="text-slate-600"><th class="p-2">c (g/mL)</th><th class="p-2">θ (degrees)</th><th class="p-2">S (calc.)</th></tr></thead><tbody id="polarimeter-readings"></tbody></table></div>
+                            <div class="h-40 overflow-y-auto border border-main rounded-lg bg-panel mb-4"><table class="w-full text-sm text-left"><thead class="bg-control sticky top-0"><tr class="text-secondary"><th class="p-2">c (g/mL)</th><th class="p-2">θ (degrees)</th><th class="p-2">S (calc.)</th></tr></thead><tbody id="polarimeter-readings"></tbody></table></div>
                             <p class="text-center font-semibold text-lg" id="polarimeter-result"></p>
                         </div>
                     </div>
                 </div>`;
             initFunctions.initPolarimeter = function(view) {
                 const canvas=view.querySelector('#polarimeterCanvas'),ctx=canvas.getContext('2d'),angleSlider=view.querySelector('#analyzer-angle'),angleDisplay=view.querySelector('#angle-display'),concSlider=view.querySelector('#concentration-slider'),concVal=view.querySelector('#concentration-val'),recordBtn=view.querySelector('#polarimeter-record-btn'),readingsBody=view.querySelector('#polarimeter-readings'),resultDisplay=view.querySelector('#polarimeter-result');
-                const w=canvas.width,h=canvas.height,cX=w/2,cY=h/2,r=w/2-10,L=2,S=66.5; // Tube length 2dm, Specific Rotation for sucrose
+                const w=canvas.width,h=canvas.height,cX=w/2,cY=h/2,r=w/2-10,L=2,S=66.5;
                 let readings=[];
                 function draw(){
-                    const c=parseFloat(concSlider.value);
-                    const userAngle=parseFloat(angleSlider.value);
-                    const trueAngle=S*L*c;
-                    const angleDiff=userAngle-trueAngle;
-                    concVal.textContent=`${c.toFixed(2)} g/mL`;
-                    angleDisplay.textContent=`${userAngle.toFixed(1)}°`;
-                    
-                    const tint = (val) => Math.min(255, Math.max(0, val));
-                    const luma = 100 - Math.abs(angleDiff) * 3;
-                    const chroma = Math.abs(angleDiff) * 5;
-                    const left_r = tint(luma + chroma * Math.sign(angleDiff));
-                    const left_b = tint(luma - chroma * Math.sign(angleDiff));
-                    const right_r = tint(luma - chroma * Math.sign(angleDiff));
-                    const right_b = tint(luma + chroma * Math.sign(angleDiff));
-                    
+                    const c=parseFloat(concSlider.value),userAngle=parseFloat(angleSlider.value),trueAngle=S*L*c,angleDiff=userAngle-trueAngle;
+                    concVal.textContent=`${c.toFixed(2)} g/mL`; angleDisplay.textContent=`${userAngle.toFixed(1)}°`;
+                    const tint=(val)=>Math.min(255,Math.max(0,val)),luma=100-Math.abs(angleDiff)*3,chroma=Math.abs(angleDiff)*5;
+                    const left_r=tint(luma+chroma*Math.sign(angleDiff)),left_b=tint(luma-chroma*Math.sign(angleDiff)),right_r=tint(luma-chroma*Math.sign(angleDiff)),right_b=tint(luma+chroma*Math.sign(angleDiff));
                     ctx.clearRect(0,0,w,h);
-                    // Left half
-                    ctx.beginPath(); ctx.moveTo(cX,cY-r); ctx.arc(cX,cY,r,-Math.PI/2,Math.PI/2); ctx.closePath();
-                    ctx.fillStyle=`rgb(${left_r}, ${luma}, ${left_b})`; ctx.fill();
-                    // Right half
-                    ctx.beginPath(); ctx.moveTo(cX,cY-r); ctx.arc(cX,cY,r,-Math.PI/2,Math.PI/2,true); ctx.closePath();
-                    ctx.fillStyle=`rgb(${right_r}, ${luma}, ${right_b})`; ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(cX,cY-r); ctx.arc(cX,cY,r,-Math.PI/2,Math.PI/2); ctx.closePath(); ctx.fillStyle=`rgb(${left_r}, ${luma}, ${left_b})`; ctx.fill();
+                    ctx.beginPath(); ctx.moveTo(cX,cY-r); ctx.arc(cX,cY,r,-Math.PI/2,Math.PI/2,true); ctx.closePath(); ctx.fillStyle=`rgb(${right_r}, ${luma}, ${right_b})`; ctx.fill();
                 }
                 function updateTable(){
                     let totalS=0;
@@ -413,86 +433,85 @@
 
             // 4. Stefan's Law
             templates['stefans-law'] = `
-                <div class="bg-white text-slate-800 p-6 sm:p-8 rounded-2xl shadow-lg">
-                    <header class="flex items-center justify-between pb-4 border-b border-slate-200"><h1 class="text-2xl font-bold">Stefan's Law</h1><button class="back-to-menu-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
+                <div class="bg-panel text-primary p-6 sm:p-8 rounded-2xl shadow-lg">
+                    <header class="flex items-center justify-between pb-4 border-b border-main"><h1 class="text-2xl font-bold">Stefan's Law</h1><button class="back-to-menu-btn bg-control hover:bg-slate-200 dark:hover:bg-slate-600 text-control font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-6">
                         <div class="flex flex-col items-center">
-                            <h3 class="font-bold text-slate-600 mb-2 text-center">Circuit Control</h3>
-                            <div class="p-4 bg-slate-100 rounded-lg mb-4 w-full flex justify-center"><svg width="400" height="200" viewBox="0 0 400 200" class="w-full h-auto max-h-52"><path d="M20 100 h 40 M20 85 v 30 M40 85 v 30" stroke="black" fill="none" stroke-width="2"/><text x="30" y="75">6V</text><path d="M60 100 h 80" stroke="black" stroke-width="2"/><rect x="140" y="90" width="80" height="20" stroke="black" fill="none" stroke-width="2"/><path d="M180 80 v 30 M140 100 l 80 -20" stroke="black" stroke-width="2"/><path d="M220 100 h 60" stroke="black" stroke-width="2"/><circle cx="300" cy="100" r="15" stroke="black" fill="none" stroke-width="2"/><path d="M292 92 l 16 16 M292 108 l 16 -16" stroke="black" stroke-width="2"/><path d="M315 100 h 65 v -60 h -360 v 60 h 20" stroke="black" stroke-width="2"/><circle cx="100" cy="40" r="15" stroke="black" fill="none" stroke-width="2"/><text x="97" y="45">A</text><circle cx="280" cy="40" r="15" stroke="black" fill="none" stroke-width="2"/><text x="277" y="45">V</text><path d="M60 40 h 25 M115 40 h 150 M295 40 h 20" stroke="black" stroke-width="2"/><path d="M280 25 v -10 h -20 M280 55 v 10 h 20" stroke="black" stroke-width="2"/><text x="170" y="125">Rheostat</text><text x="300" y="130" text-anchor="middle">Bulb</text></svg></div>
+                            <h3 class="font-bold text-secondary mb-2 text-center">Circuit Control</h3>
+                            <div class="p-4 bg-control rounded-lg mb-4 w-full flex justify-center"><svg width="400" height="200" viewBox="0 0 400 200" class="w-full h-auto max-h-52"><path d="M20 100 h 40 M20 85 v 30 M40 85 v 30" stroke="var(--text-primary)" fill="none" stroke-width="2"/><text x="30" y="75" fill="var(--text-primary)">6V</text><path d="M60 100 h 80" stroke="var(--text-primary)" stroke-width="2"/><rect x="140" y="90" width="80" height="20" stroke="var(--text-primary)" fill="none" stroke-width="2"/><path d="M180 80 v 30 M140 100 l 80 -20" stroke="var(--text-primary)" stroke-width="2"/><path d="M220 100 h 60" stroke="var(--text-primary)" stroke-width="2"/><circle id="stefan-bulb-outline" cx="300" cy="100" r="15" stroke="var(--text-primary)" fill="none" stroke-width="2"/><path d="M292 92 l 16 16 M292 108 l 16 -16" stroke="var(--text-primary)" stroke-width="2"/><path d="M315 100 h 65 v -60 h -360 v 60 h 20" stroke="var(--text-primary)" stroke-width="2"/><circle cx="100" cy="40" r="15" stroke="var(--text-primary)" fill="none" stroke-width="2"/><text x="97" y="45" fill="var(--text-primary)">A</text><circle cx="280" cy="40" r="15" stroke="var(--text-primary)" fill="none" stroke-width="2"/><text x="277" y="45" fill="var(--text-primary)">V</text><path d="M60 40 h 25 M115 40 h 150 M295 40 h 20" stroke="var(--text-primary)" stroke-width="2"/><path d="M280 25 v -10 h -20 M280 55 v 10 h 20" stroke="var(--text-primary)" stroke-width="2"/><text x="170" y="125" fill="var(--text-secondary)">Rheostat</text><text x="300" y="130" text-anchor="middle" fill="var(--text-secondary)">Bulb</text></svg></div>
                              <div class="w-full max-w-sm mt-4">
-                                <label class="flex justify-between items-center text-sm font-medium text-slate-600 mb-2"><span>Rheostat Control</span><span id="power-display" class="font-bold text-red-600 bg-red-100 px-2 py-1 rounded">0.00 W</span></label>
+                                <label class="flex justify-between items-center text-sm font-medium text-secondary mb-2"><span>Rheostat Control</span><span id="power-display" class="font-bold text-red-600 bg-red-100 dark:bg-red-900 dark:text-red-300 px-2 py-1 rounded">0.00 W</span></label>
                                 <input id="rheostat-slider" type="range" min="0" max="100" value="0" step="1">
-                                <div class="flex justify-between mt-2 text-sm font-mono text-slate-500"><span>Min Power</span><span>Max Power</span></div>
+                                <div class="flex justify-between mt-2 text-sm font-mono text-secondary"><span>Min Power</span><span>Max Power</span></div>
                             </div>
-                            <div class="mt-4 flex gap-4 text-center">
-                                <div><div class="font-bold text-lg" id="voltmeter">0.00 V</div><div class="text-sm text-slate-500">Voltmeter</div></div>
-                                <div><div class="font-bold text-lg" id="ammeter">0.00 A</div><div class="text-sm text-slate-500">Ammeter</div></div>
+                            <div class="mt-4 flex gap-8 text-center bg-control p-4 rounded-lg">
+                                <div><div class="font-bold text-lg" id="voltmeter">0.00 V</div><div class="text-sm text-secondary">Voltmeter</div></div>
+                                <div><div class="font-bold text-lg" id="ammeter">0.00 A</div><div class="text-sm text-secondary">Ammeter</div></div>
                             </div>
                         </div>
                         <div>
-                            <div class="border rounded-lg mb-4"><button class="hint-toggle w-full p-3 font-bold text-slate-700 flex justify-between items-center"><span>Procedure & Hints</span><i class="ph-caret-down"></i></button><div class="hint-content"><div class="p-3 border-t text-sm text-slate-600"><strong>1. Collect Data:</strong> Move the "Rheostat Control" slider to apply different power levels to the bulb. Click "Record Data" at various points, especially as the bulb starts to glow brightly.<br><strong>2. Calculate Slope:</strong> After collecting at least 2 data points, click "Calculate Slope". This finds the slope of the best-fit line for Log(P) vs Log(T).<br><strong>3. Verify Law:</strong> The calculated slope should be close to 4 to verify Stefan's Law (P ∝ T⁴).</div></div></div>
+                            <div class="border border-main rounded-lg mb-4"><button class="hint-toggle w-full p-3 font-bold flex justify-between items-center"><span>Procedure & Hints</span><i class="ph-caret-down"></i></button><div class="hint-content"><div class="p-3 border-t border-main text-sm text-secondary"><strong>1. Collect Data:</strong> Move the "Rheostat Control" slider to apply different power levels to the bulb. Click "Record Data" at various points, especially as the bulb starts to glow brightly.<br><strong>2. Calculate Slope:</strong> After collecting at least 2 data points, click "Calculate Slope". This finds the slope of the best-fit line for Log(P) vs Log(T).<br><strong>3. Verify Law:</strong> The calculated slope should be close to 4 to verify Stefan's Law (P ∝ T⁴).</div></div></div>
                             <div class="flex gap-4 mb-4"><button id="stefan-record-btn" class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Record Data</button><button id="stefan-calculate-btn" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50" disabled>Calculate Slope</button></div>
-                            <div class="h-64 overflow-y-auto border rounded-lg bg-white mb-4"><table class="w-full text-sm text-left"><thead class="bg-slate-100 sticky top-0"><tr class="text-slate-600"><th class="p-2">P (W)</th><th class="p-2">T (K)</th><th class="p-2">log₁₀(P)</th><th class="p-2">log₁₀(T)</th></tr></thead><tbody id="stefan-readings"></tbody></table></div>
+                            <div class="h-64 overflow-y-auto border border-main rounded-lg bg-panel mb-4"><table class="w-full text-sm text-left"><thead class="bg-control sticky top-0"><tr class="text-secondary"><th class="p-2">P (W)</th><th class="p-2">T (K)</th><th class="p-2">log₁₀(P)</th><th class="p-2">log₁₀(T)</th></tr></thead><tbody id="stefan-readings"></tbody></table></div>
                             <p class="text-center font-semibold text-lg" id="stefan-result"></p>
                         </div>
                     </div>
                 </div>`;
             initFunctions.initStefanslaw = function(view) {
-                const rheostat=view.querySelector('#rheostat-slider'),vDisp=view.querySelector('#voltmeter'),aDisp=view.querySelector('#ammeter'),pDisp=view.querySelector('#power-display'),recBtn=view.querySelector('#stefan-record-btn'),calcBtn=view.querySelector('#stefan-calculate-btn'),readingsBody=view.querySelector('#stefan-readings'),resultDisp=view.querySelector('#stefan-result');
-                const R0=0.8; // Resistance at 273K (Ohms)
-                const tempTable=[[273,1],[373,1.53],[473,2.07],[573,2.63],[673,3.22],[773,3.8],[873,4.4],[973,5],[1073,5.64],[1173,6.37],[1273,6.94],[1373,7.6],[1473,8.26],[1573,8.9],[1673,9.7],[1773,10.43],[2273,14.5],[2773,18.5]]; // K, Rt/R0
+                const rheostat=view.querySelector('#rheostat-slider'),vDisp=view.querySelector('#voltmeter'),aDisp=view.querySelector('#ammeter'),pDisp=view.querySelector('#power-display'),recBtn=view.querySelector('#stefan-record-btn'),calcBtn=view.querySelector('#stefan-calculate-btn'),readingsBody=view.querySelector('#stefan-readings'),resultDisp=view.querySelector('#stefan-result'),bulb=view.querySelector('#stefan-bulb-outline');
+                const R0=0.8;
+                const tempTable=[[273,1],[373,1.53],[473,2.07],[573,2.63],[673,3.22],[773,3.8],[873,4.4],[973,5],[1073,5.64],[1173,6.37],[1273,6.94],[1373,7.6],[1473,8.26],[1573,8.9],[1673,9.7],[1773,10.43],[2273,14.5],[2773,18.5]];
                 let readings=[],V=0,I=0;
                 function getTemp(rt_r0){if(rt_r0<=1)return 273;for(let i=0;i<tempTable.length-1;i++){const[T1,R1]=tempTable[i],[T2,R2]=tempTable[i+1];if(rt_r0>=R1&&rt_r0<=R2){return T1+(rt_r0-R1)*((T2-T1)/(R2-R1));}}return 2800;}
-                function updateCircuit(){const rheoVal=parseFloat(rheostat.value);V=6*(rheoVal/100);const R_guess=R0*10;let Rt=R_guess; for(let i=0;i<5;i++){I=V/Rt;const T=getTemp(Rt/R0);Rt=R0*(1+0.0045*(T-273));} I=V/Rt;const P=V*I;vDisp.textContent=`${V.toFixed(2)} V`;aDisp.textContent=`${I.toFixed(2)} A`;pDisp.textContent=`${P.toFixed(2)} W`;}
+                function updateCircuit(){const rheoPercent=parseFloat(rheostat.value)/100;const R_bulb_approx=R0*(1+18*rheoPercent);const R_rheo=100*(1-rheoPercent);const I_total=6/(R_rheo+R_bulb_approx);V=I_total*R_bulb_approx;I=I_total;if(rheoPercent===0){V=0;I=0;}const P=V*I;const T=getTemp((V/I)/R0);vDisp.textContent=`${V.toFixed(2)} V`;aDisp.textContent=`${I.toFixed(2)} A`;pDisp.textContent=`${P.toFixed(2)} W`;const glow=Math.max(0,Math.min(1,(T-800)/1500));bulb.style.fill=`rgba(255, 220, 100, ${glow})`;bulb.style.filter=`blur(${glow*5}px)`;}
                 function updateTable(){readingsBody.innerHTML=readings.map(r=>`<tr><td class="p-2 font-mono">${r.P.toFixed(2)}</td><td class="p-2 font-mono">${r.T.toFixed(0)}</td><td class="p-2 font-mono">${r.logP.toFixed(3)}</td><td class="p-2 font-mono">${r.logT.toFixed(3)}</td></tr>`).join('');calcBtn.disabled=readings.length<2;}
-                recBtn.addEventListener('click',()=>{if(V<=0||I<=0)return;const P=V*I;const Rt=V/I;const T=getTemp(Rt/R0);const logP=Math.log10(P);const logT=Math.log10(T);readings.push({P,T,logP,logT});updateTable();});
+                recBtn.addEventListener('click',()=>{if(V<=0||I<=0)return;const P=V*I;const Rt=V/I;const T=getTemp(Rt/R0);if(T<300) return; const logP=Math.log10(P);const logT=Math.log10(T);readings.push({P,T,logP,logT});updateTable();});
                 calcBtn.addEventListener('click',()=>{let n=readings.length,sumX=0,sumY=0,sumXY=0,sumX2=0;readings.forEach(r=>{sumX+=r.logT;sumY+=r.logP;sumXY+=r.logT*r.logP;sumX2+=r.logT*r.logT;});const slope=(n*sumXY-sumX*sumY)/(n*sumX2-sumX*sumX);resultDisp.innerHTML=`Calculated Slope (σ): <span class="text-blue-600">${slope.toFixed(3)}</span> (Ideal: 4)`;});
                 rheostat.addEventListener('input',updateCircuit); updateCircuit();
             };
 
              // 5. Carey Foster's Bridge
             templates['carey-foster-bridge'] = `
-                <div class="bg-white text-slate-800 p-6 sm:p-8 rounded-2xl shadow-lg">
-                    <header class="flex items-center justify-between pb-4 border-b border-slate-200"><h1 class="text-2xl font-bold">Carey Foster's Bridge</h1><button class="back-to-menu-btn bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
+                <div class="bg-panel text-primary p-6 sm:p-8 rounded-2xl shadow-lg">
+                    <header class="flex items-center justify-between pb-4 border-b border-main"><h1 class="text-2xl font-bold">Carey Foster's Bridge</h1><button class="back-to-menu-btn bg-control hover:bg-slate-200 dark:hover:bg-slate-600 text-control font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-6">
                         <div class="flex flex-col items-center">
-                            <h3 class="font-bold text-slate-600 mb-2 text-center">Bridge Setup</h3>
+                            <h3 class="font-bold text-secondary mb-2 text-center">Bridge Setup</h3>
                             <div id="bridge-svg" class="w-full"></div>
-                            <div class="w-full max-w-lg mt-4 relative h-10">
-                                <div class="h-2 bg-gray-300 rounded-full absolute top-1/2 -translate-y-1/2 w-full"></div>
-                                <div class="absolute top-1/2 -translate-y-1/2 w-full flex justify-between text-xs px-1"><span>0cm</span><span>100cm</span></div>
-                                <div id="jockey" class="absolute top-1/2 -translate-y-1/2 w-2 h-10 bg-red-500 rounded cursor-ew-resize" style="left:50%;"></div>
+                            <div class="bridge-container w-full max-w-lg mt-4 relative h-10">
+                                <div class="h-2 bg-control rounded-full absolute top-1/2 -translate-y-1/2 w-full border border-main"></div>
+                                <div class="absolute top-1/2 -translate-y-1/2 w-full flex justify-between text-xs px-1 text-secondary"><span>0cm</span><span>100cm</span></div>
+                                <div id="jockey" class="absolute top-1/2 -translate-y-1/2 w-2 h-10 bg-red-500 rounded cursor-ew-resize" style="left:50%;"><div class="w-4 h-4 rounded-full bg-white border-2 border-red-500 absolute -top-1 -left-1"></div></div>
                             </div>
-                            <div id="galvanometer" class="mt-4 w-48 h-12 border-2 rounded-lg flex items-center justify-center text-lg font-mono relative">0<div id="galvo-needle" class="absolute bottom-1 w-px h-5 bg-black transition-transform origin-bottom" style="transform: rotate(0deg);"></div></div>
+                            <div id="galvanometer" class="mt-4 w-48 h-12 border-2 border-main rounded-lg flex items-center justify-center text-lg font-mono relative"><span class="text-secondary">G</span><div id="galvo-needle" class="absolute bottom-1 w-px h-5 bg-primary transition-transform origin-bottom" style="transform: rotate(0deg);"></div></div>
                         </div>
                         <div>
-                            <div class="border rounded-lg mb-4"><button class="hint-toggle w-full p-3 font-bold text-slate-700 flex justify-between items-center"><span>Procedure & Hints</span><i class="ph-caret-down"></i></button><div class="hint-content"><div class="p-3 border-t text-sm text-slate-600"><strong>Part 1 (Find ρ):</strong> Set Mode to "Find ρ". Set a known resistance X. Find the null point (galvanometer at 0) and record l₁. Click "Swap Gaps" and find the new null point l₂. Repeat for different X.<br><strong>Part 2 (Find R):</strong> Set Mode to "Find R". Repeat the process to find l'₁ and l'₂.<br><strong>Calculate:</strong> Use the formulas to find ρ and then R.</div></div></div>
-                            <div class="bg-slate-50 p-4 rounded-xl border mb-4">
-                                <h3 class="font-bold text-slate-700 mb-4">Controls</h3>
+                            <div class="border border-main rounded-lg mb-4"><button class="hint-toggle w-full p-3 font-bold flex justify-between items-center"><span>Procedure & Hints</span><i class="ph-caret-down"></i></button><div class="hint-content"><div class="p-3 border-t border-main text-sm text-secondary"><strong>Part 1 (Find ρ):</strong> Set Mode to "Find ρ". Set a known resistance X. Find the null point (galvanometer at 0) and record l₁. Click "Swap Gaps" and find the new null point l₂. Repeat for different X.<br><strong>Part 2 (Find R):</strong> Set Mode to "Find R". Repeat the process to find l'₁ and l'₂.<br><strong>Calculate:</strong> Use the formulas to find ρ and then R.</div></div></div>
+                            <div class="bg-control p-4 rounded-xl border border-main mb-4">
+                                <h3 class="font-bold text-primary mb-4">Controls</h3>
                                 <div class="grid grid-cols-2 gap-4">
-                                    <div><label class="block text-sm font-medium">Mode</label><select id="bridge-mode" class="w-full p-2 border rounded-md"><option value="rho">Find ρ (Copper Strip)</option><option value="R">Find R (Unknown Wire)</option></select></div>
-                                    <div><label class="block text-sm font-medium">Known Resistance X (Ω)</label><input id="known-R" type="number" value="1.0" step="0.1" class="w-full p-2 border rounded-md"></div>
+                                    <div><label class="block text-sm font-medium text-secondary">Mode</label><select id="bridge-mode" class="w-full p-2 rounded-md"><option value="rho">Find ρ (Copper Strip)</option><option value="R">Find R (Unknown Wire)</option></select></div>
+                                    <div><label class="block text-sm font-medium text-secondary">Known Resistance X (Ω)</label><input id="known-R" type="number" value="1.0" step="0.1" min="0.1" class="w-full p-2 rounded-md"></div>
                                 </div>
-                                <button id="swap-gaps-btn" class="w-full mt-3 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">Swap Gaps</button>
+                                <button id="swap-gaps-btn" class="w-full mt-3 bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg hover:bg-slate-300">Swap Gaps</button>
                             </div>
                             <button id="bridge-record-btn" class="w-full mb-4 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700">Record Null Point</button>
-                            <div class="h-40 overflow-y-auto border rounded-lg bg-white mb-4"><table class="w-full text-sm text-left"><thead class="bg-slate-100 sticky top-0"><tr class="text-slate-600"><th class="p-2">X (Ω)</th><th class="p-2">Reading</th><th class="p-2">Value (cm)</th></tr></thead><tbody id="bridge-readings"></tbody></table></div>
+                            <div class="h-40 overflow-y-auto border border-main rounded-lg bg-panel mb-4"><table class="w-full text-sm text-left"><thead class="bg-control sticky top-0"><tr class="text-secondary"><th class="p-2">X (Ω)</th><th class="p-2">Reading</th><th class="p-2">Value (cm)</th></tr></thead><tbody id="bridge-readings"></tbody></table></div>
                             <p class="text-center font-semibold text-lg" id="bridge-result"></p>
                         </div>
                     </div>
                 </div>`;
             initFunctions.initCareyfosterbridge = function(view) {
-                const svgContainer=view.querySelector('#bridge-svg'),jockey=view.querySelector('#jockey'),galvo=view.querySelector('#galvanometer'),galvoNeedle=view.querySelector('#galvo-needle'),modeSelect=view.querySelector('#bridge-mode'),knownRIn=view.querySelector('#known-R'),swapBtn=view.querySelector('#swap-gaps-btn'),recordBtn=view.querySelector('#bridge-record-btn'),readingsBody=view.querySelector('#bridge-readings'),resultDisp=view.querySelector('#bridge-result');
-                const RHO_ACTUAL=0.015,R_UNKNOWN_ACTUAL=0.7; // Ohm/cm, Ohm
-                let isSwapped=false,mode='rho',readings=[];
-                function drawSVG(){const X=parseFloat(knownRIn.value).toFixed(1);const Y=(mode==='rho'?0:R_UNKNOWN_ACTUAL).toFixed(1);const left=isSwapped?Y:X;const right=isSwapped?X:Y;svgContainer.innerHTML=`<svg viewBox="0 0 500 100"><style>.txt{font-size:12px;font-family:monospace;text-anchor:middle;}</style><rect x="50" y="30" width="80" height="20" stroke="black" rx="2"/><text x="90" y="44" class="txt">${left} Ω</text><rect x="370" y="30" width="80" height="20" stroke="black" rx="2"/><text x="410" y="44" class="txt">${right} Ω</text><rect x="180" y="30" width="60" height="20" stroke="black" fill="#e0e0e0"/><text x="210" y="44" class="txt">1Ω</text><rect x="260" y="30" width="60" height="20" stroke="black" fill="#e0e0e0"/><text x="290" y="44" class="txt">1Ω</text><path d="M10 40 h 40 M130 40 h 50 M240 40 h 20 M320 40 h 50 M450 40 h 40" stroke="black" fill="none" stroke-width="2"/><circle cx="155" cy="40" r="3" fill="black"/><circle cx="345" cy="40" r="3" fill="black"/><text x="90" y="25" class="txt">${isSwapped?'Gap 2':'Gap 1'}</text><text x="410" y="25" class="txt">${isSwapped?'Gap 1':'Gap 2'}</text><text x="210" y="25" class="txt">P</text><text x="290" y="25" class="txt">Q</text></svg>`;}
+                const svgContainer=view.querySelector('#bridge-svg'),jockey=view.querySelector('#jockey'),galvoNeedle=view.querySelector('#galvo-needle'),modeSelect=view.querySelector('#bridge-mode'),knownRIn=view.querySelector('#known-R'),swapBtn=view.querySelector('#swap-gaps-btn'),recordBtn=view.querySelector('#bridge-record-btn'),readingsBody=view.querySelector('#bridge-readings');
+                const RHO_ACTUAL=0.015,R_UNKNOWN_ACTUAL=0.7; let isSwapped=false,mode='rho',readings=[];
+                function drawSVG(){const X=parseFloat(knownRIn.value).toFixed(1);const Y_text=(mode==='rho'?'Cu Strip':'R wire');const left_text=isSwapped?Y_text:X+' Ω';const right_text=isSwapped?X+' Ω':Y_text;svgContainer.innerHTML=`<svg viewBox="0 0 500 100"><style>.txt{font-size:12px;font-family:monospace;text-anchor:middle;fill:var(--text-primary);}.txt-sec{font-size:10px;fill:var(--text-secondary);}</style><rect x="50" y="30" width="80" height="20" stroke="var(--text-primary)" fill="var(--control-bg)" rx="2"/><text x="90" y="44" class="txt">${left_text}</text><rect x="370" y="30" width="80" height="20" stroke="var(--text-primary)" fill="var(--control-bg)" rx="2"/><text x="410" y="44" class="txt">${right_text}</text><rect x="180" y="30" width="60" height="20" stroke="var(--text-primary)" fill="var(--panel-bg)"/><text x="210" y="44" class="txt">1Ω</text><rect x="260" y="30" width="60" height="20" stroke="var(--text-primary)" fill="var(--panel-bg)"/><text x="290" y="44" class="txt">1Ω</text><path d="M10 40 h 40 M130 40 h 50 M240 40 h 20 M320 40 h 50 M450 40 h 40" stroke="var(--text-primary)" fill="none" stroke-width="2"/><circle cx="155" cy="40" r="3" fill="var(--text-primary)"/><circle cx="345" cy="40" r="3" fill="var(--text-primary)"/><text x="90" y="25" class="txt txt-sec">${isSwapped?'Gap 2':'Gap 1'}</text><text x="410" y="25" class="txt txt-sec">${isSwapped?'Gap 1':'Gap 2'}</text><text x="210" y="25" class="txt txt-sec">P</text><text x="290" y="25" class="txt txt-sec">Q</text></svg>`;}
                 function updateBridge(){const X=parseFloat(knownRIn.value),Y=mode==='rho'?0:R_UNKNOWN_ACTUAL,P=1,Q=1;const leftR=isSwapped?Y:X,rightR=isSwapped?X:Y;const l_jockey=parseFloat(jockey.style.left)/100;const R_wire=100*RHO_ACTUAL;const R_left_arm=leftR+l_jockey*R_wire,R_right_arm=rightR+(1-l_jockey)*R_wire;const balance_ratio=(P/Q)/(R_left_arm/R_right_arm);const deflection=Math.atan(balance_ratio-1)*90;galvoNeedle.style.transform=`rotate(${Math.max(-45,Math.min(45,deflection))}deg)`;}
-                function moveJockey(e){const rect=jockey.parentElement.getBoundingClientRect();const x=(e.clientX||e.touches[0].clientX)-rect.left;jockey.style.left=`${Math.max(0,Math.min(100, (x/rect.width)*100))}%`;updateBridge();}
-                jockey.addEventListener('mousedown',(e)=>{e.preventDefault();document.addEventListener('mousemove',moveJockey);document.addEventListener('mouseup',()=>{document.removeEventListener('mousemove',moveJockey);},{once:true});});
+                function moveJockey(x){const rect=jockey.parentElement.getBoundingClientRect();jockey.style.left=`${Math.max(0,Math.min(100, (x/rect.width)*100))}%`;updateBridge();}
+                sharedUtils.makeDraggable(jockey, moveJockey, 'x');
                 modeSelect.addEventListener('change',()=>{mode=modeSelect.value;readings=[];readingsBody.innerHTML='';isSwapped=false;drawSVG();updateBridge();});
                 knownRIn.addEventListener('input',()=>{drawSVG();updateBridge();});
                 swapBtn.addEventListener('click',()=>{isSwapped=!isSwapped;drawSVG();updateBridge();});
-                recordBtn.addEventListener('click',()=>{const l=parseFloat(jockey.style.left);const X=parseFloat(knownRIn.value);let readingType;if(mode==='rho'){readingType=isSwapped?'l₂':'l₁';}else{readingType=isSwapped?"l'₂":"l'₁";}readings.push({X,type:readingType,val:l.toFixed(1)});readingsBody.innerHTML+=`<tr><td class="p-2">${X}</td><td class="p-2">${readingType}</td><td class="p-2">${l.toFixed(1)}</td></tr>`;});
+                recordBtn.addEventListener('click',()=>{const l=parseFloat(jockey.style.left);const X=parseFloat(knownRIn.value);let readingType=mode==='rho'?(isSwapped?'l₂':'l₁'):(isSwapped?"l'₂":"l'₁");readings.push({X,type:readingType,val:l.toFixed(1)});readingsBody.innerHTML+=`<tr><td class="p-2">${X.toFixed(1)}</td><td class="p-2">${readingType}</td><td class="p-2">${l.toFixed(1)}</td></tr>`;});
                 drawSVG();updateBridge();
             };
 
