@@ -52,6 +52,14 @@
         }
         .view-enter { animation: fadeIn 0.4s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards; }
         .view-exit { animation: fadeOut 0.3s cubic-bezier(0.550, 0.055, 0.675, 0.190) forwards; }
+        
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(100%); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .notification {
+            animation: slideInUp 0.5s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
+        }
 
         .bg-panel { background-color: var(--panel-bg); }
         .text-primary { color: var(--text-primary); }
@@ -61,16 +69,16 @@
         .text-control { color: var(--control-text); }
 
 
-        .experiment-card {
+        .experiment-card, .plan-card, .stat-card {
             background-color: var(--panel-bg);
             transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
             border: 1px solid var(--border-color);
         }
-        .experiment-card:hover {
+        .experiment-card:hover, .plan-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px -5px rgba(15, 23, 42, 0.07);
         }
-        html.dark .experiment-card:hover {
+        html.dark .experiment-card:hover, html.dark .plan-card:hover {
              box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
         }
         .experiment-card.disabled { cursor: not-allowed; opacity: 0.6; }
@@ -104,17 +112,25 @@
 
     <div class="w-full max-w-7xl mx-auto min-h-screen">
         <!-- Main Menu View -->
-        <div id="menu-view" class="app-view active view-enter">
+        <div id="menu-view" class="app-view">
             <header class="text-center mb-10 relative">
                 <h1 class="text-5xl font-bold tracking-tight text-primary">Virtual Physics Lab</h1>
                 <p class="text-lg text-secondary mt-2">Choose an experiment to simulate</p>
-                 <button id="theme-toggle-btn" class="absolute top-0 right-0 p-2 rounded-full bg-control hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
-                    <i id="theme-icon" class="ph ph-moon text-2xl text-primary"></i>
-                </button>
+                 <div class="absolute top-0 right-0 flex items-center gap-2">
+                    <button id="go-premium-btn" class="text-sm font-semibold bg-amber-400 text-amber-900 px-3 py-2 rounded-lg hover:bg-amber-500 transition-colors">
+                        Go Premium
+                    </button>
+                    <button id="theme-toggle-btn" class="p-2 rounded-full bg-control hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                        <i id="theme-icon" class="ph ph-moon text-2xl text-primary"></i>
+                    </button>
+                 </div>
             </header>
             <main id="main-menu-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 <!-- Experiment cards are injected by JavaScript -->
             </main>
+             <footer class="text-center mt-12 text-secondary text-sm">
+                Made by Aditya Pandey
+            </footer>
         </div>
 
         <!-- VIEWS FOR EACH EXPERIMENT (Injected by JS) -->
@@ -123,11 +139,38 @@
         <div id="polarimeter-view" class="app-view"></div>
         <div id="stefans-law-view" class="app-view"></div>
         <div id="carey-foster-bridge-view" class="app-view"></div>
+        <div id="subscription-view" class="app-view"></div>
     </div>
+
+    <!-- Notification Panel -->
+    <div id="notification-panel" class="notification fixed bottom-4 right-4 w-full max-w-sm bg-panel shadow-2xl rounded-lg p-4 border border-main hidden">
+        <div class="flex items-start gap-4">
+            <div class="text-blue-500 mt-1">
+                <i class="ph-fill ph-info text-2xl"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-primary">Feedback & Suggestions</h4>
+                <p class="text-sm text-secondary mt-1">Please contact Aditya Pandey for any feedback and suggestions to improve this lab.</p>
+            </div>
+            <button id="close-notification-btn" class="ml-auto text-secondary hover:text-primary">&times;</button>
+        </div>
+    </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
+            // --- NOTIFICATION LOGIC ---
+            const notificationPanel = document.getElementById('notification-panel');
+            const closeNotificationBtn = document.getElementById('close-notification-btn');
+            setTimeout(() => {
+                notificationPanel.classList.remove('hidden');
+            }, 2000); 
+            closeNotificationBtn.addEventListener('click', () => {
+                notificationPanel.style.display = 'none';
+            });
+
+
             // --- THEME SWITCHER LOGIC ---
             const themeToggleBtn = document.getElementById('theme-toggle-btn');
             const themeIcon = document.getElementById('theme-icon');
@@ -162,19 +205,26 @@
 
                 init() {
                     document.querySelectorAll('.app-view').forEach(v => { this.views[v.id] = v; });
+                    this.views[this.currentView].classList.add('active');
                     this.createMainMenu();
                     this.setupEventListeners();
                 },
 
                 showView(viewId) {
                     if (this.currentView === viewId) return;
+
                     const oldView = this.views[this.currentView];
-                    const newView = this.views[viewId];
                     if (oldView) {
                         oldView.classList.add('view-exit');
                         oldView.addEventListener('animationend', () => { oldView.classList.remove('active', 'view-exit'); }, { once: true });
                     }
+                    
+                    const newView = this.views[viewId];
                     if (newView) {
+                        if (!newView.innerHTML.trim() && templates[viewId.replace('-view', '')]) {
+                             newView.innerHTML = templates[viewId.replace('-view', '')];
+                        }
+
                         newView.classList.add('active', 'view-enter');
                         newView.addEventListener('animationend', () => { newView.classList.remove('view-enter'); }, { once: true });
                     }
@@ -209,14 +259,10 @@
                         if (card && !card.classList.contains('disabled')) {
                             const experimentId = card.dataset.experiment;
                             const viewId = `${experimentId}-view`;
-                            const view = this.views[viewId];
-                            
-                            if (!view.innerHTML.trim() && templates[experimentId]) {
-                                view.innerHTML = templates[experimentId];
-                            }
                             
                             this.showView(viewId);
                             
+                            const view = this.views[viewId];
                             if (view && !view.dataset.initialized) {
                                 const initFuncName = `init${experimentId.charAt(0).toUpperCase() + experimentId.slice(1).replace(/-/g, '')}`;
                                 if (typeof initFunctions[initFuncName] === 'function') {
@@ -225,7 +271,10 @@
                                 view.dataset.initialized = 'true';
                             }
                         }
-                        if (event.target.closest('.back-to-menu-btn')) { this.showView('menu-view'); }
+
+                        if (event.target.closest('#go-premium-btn')) this.showView('subscription-view');
+                        if (event.target.closest('.back-to-menu-btn')) this.showView('menu-view');
+
                         const hintToggle = event.target.closest('.hint-toggle');
                         if (hintToggle) {
                             const content = hintToggle.nextElementSibling;
@@ -524,10 +573,8 @@
                     const balance_ratio=(R_left_arm > 0 && R_right_arm > 0) ? (P/Q)/(R_left_arm/R_right_arm) : 1;
                     const deflection=Math.atan(balance_ratio-1)*90;
                     galvoNeedle.style.transform=`rotate(${Math.max(-45,Math.min(45,deflection))}deg)`;
-                    const current = deflection / 4.5; // Map angle to a -10 to +10 range
-                    if (galvoReading) {
-                        galvoReading.textContent = `${current.toFixed(2)} μA`;
-                    }
+                    const current = deflection / 4.5;
+                    if (galvoReading) { galvoReading.textContent = `${current.toFixed(2)} μA`; }
                 }
                 function moveJockey(x){const rect=jockey.parentElement.getBoundingClientRect();jockey.style.left=`${Math.max(0,Math.min(100, (x/rect.width)*100))}%`;updateBridge();}
                 sharedUtils.makeDraggable(jockey, moveJockey, 'x');
@@ -537,6 +584,88 @@
                 recordBtn.addEventListener('click',()=>{const l=parseFloat(jockey.style.left);const X=parseFloat(knownRIn.value);let readingType=mode==='rho'?(isSwapped?'l₂':'l₁'):(isSwapped?"l'₂":"l'₁");readings.push({X,type:readingType,val:l.toFixed(1)});readingsBody.innerHTML+=`<tr><td class="p-2">${X.toFixed(1)}</td><td class="p-2">${readingType}</td><td class="p-2">${l.toFixed(1)}</td></tr>`;});
                 drawSVG();updateBridge();
             };
+
+            // 6. Subscription Page
+            templates['subscription'] = `
+                <div class="bg-panel text-primary p-6 sm:p-8 rounded-2xl shadow-lg">
+                    <header class="flex items-center justify-between pb-4 border-b border-main"><h1 class="text-2xl font-bold">Subscription Plans</h1><button class="back-to-menu-btn bg-control hover:bg-slate-200 dark:hover:bg-slate-600 text-control font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
+                    <div class="mt-6 text-center">
+                        <p class="text-secondary">Unlock more features and support the development of the Virtual Physics Lab.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 max-w-4xl mx-auto">
+                        <!-- Pro Plan -->
+                        <div class="plan-card rounded-xl p-8 flex flex-col">
+                            <h3 class="text-2xl font-bold text-cyan-500">Pro</h3>
+                            <p class="mt-2 text-secondary">Advanced tools for the serious student.</p>
+                            <div class="mt-6">
+                                <span class="text-5xl font-bold">₹1000</span>
+                                <span class="text-secondary">/ month</span>
+                            </div>
+                            <ul class="space-y-3 mt-8 text-left flex-grow">
+                                <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-green-500 text-xl"></i><span>All basic experiments</span></li>
+                                <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-green-500 text-xl"></i><span>Save and export data</span></li>
+                                <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-green-500 text-xl"></i><span>Advanced parameter control</span></li>
+                                <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-green-500 text-xl"></i><span>Access to 5+ more Pro experiments</span></li>
+                            </ul>
+                            <button class="w-full mt-8 bg-cyan-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-cyan-600 transition-colors">Choose Pro</button>
+                        </div>
+                        <!-- Premium Plan -->
+                        <div class="plan-card rounded-xl p-8 flex flex-col border-2 border-amber-400 relative">
+                             <div class="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">MOST POPULAR</div>
+                            <h3 class="text-2xl font-bold text-amber-400">Premium</h3>
+                            <p class="mt-2 text-secondary">The complete virtual lab experience for enthusiasts.</p>
+                            <div class="mt-6">
+                                <span class="text-5xl font-bold">₹2500</span>
+                                <span class="text-secondary">/ month</span>
+                            </div>
+                            <ul class="space-y-3 mt-8 text-left flex-grow">
+                                <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-green-500 text-xl"></i><span>Everything in Pro</span></li>
+                                <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-green-500 text-xl"></i><span>Unlimited cloud saves</span></li>
+                                <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-green-500 text-xl"></i><span>AI-powered lab assistance</span></li>
+                                <li class="flex items-center gap-3"><i class="ph-fill ph-check-circle text-green-500 text-xl"></i><span>Priority support</span></li>
+                            </ul>
+                            <button class="w-full mt-8 bg-amber-400 text-amber-900 font-bold py-3 px-4 rounded-lg hover:bg-amber-500 transition-colors">Choose Premium</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+             // 7. Profile Page
+            templates['profile'] = `
+                <div class="bg-panel text-primary p-6 sm:p-8 rounded-2xl shadow-lg">
+                    <header class="flex items-center justify-between pb-4 border-b border-main"><h1 class="text-2xl font-bold">User Profile</h1><button class="back-to-menu-btn bg-control hover:bg-slate-200 dark:hover:bg-slate-600 text-control font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
+                    <div class="mt-8 text-center">
+                        <div class="inline-block relative">
+                            <div class="w-32 h-32 rounded-full bg-indigo-500 flex items-center justify-center text-white text-6xl font-bold">
+                               <span id="profile-initial"></span>
+                            </div>
+                        </div>
+                        <h2 id="profile-name" class="mt-4 text-3xl font-bold"></h2>
+                        <p class="text-secondary mt-1">Membership: <span class="font-semibold text-primary">Basic</span></p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 max-w-4xl mx-auto">
+                        <div class="stat-card rounded-xl p-6 text-center">
+                           <i class="ph-fill ph-timer text-4xl text-green-500"></i>
+                           <p class="text-3xl font-bold mt-2" id="profile-time">00:00:00</p>
+                           <p class="text-secondary text-sm">Total Time in Lab</p>
+                        </div>
+                         <div class="stat-card rounded-xl p-6 text-center">
+                           <i class="ph-fill ph-flask text-4xl text-sky-500"></i>
+                           <p class="text-3xl font-bold mt-2" id="profile-exp-completed">0</p>
+                           <p class="text-secondary text-sm">Experiments Completed</p>
+                        </div>
+                         <div class="stat-card rounded-xl p-6 text-center">
+                           <i class="ph-fill ph-star text-4xl text-amber-500"></i>
+                           <p class="text-3xl font-bold mt-2">0</p>
+                           <p class="text-secondary text-sm">Achievements Unlocked</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-10">
+                        <button id="logout-btn" class="font-semibold bg-red-100 text-red-700 px-6 py-3 rounded-lg hover:bg-red-200 transition-colors">Logout</button>
+                    </div>
+                </div>
+            `;
+
 
             App.init();
         });
