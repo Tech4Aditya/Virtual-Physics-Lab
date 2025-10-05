@@ -121,7 +121,14 @@
                 </div>
                 <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-primary">Virtual Physics Lab</h1>
                 <p class="text-lg text-secondary mt-2">A JIIT & Aditya Pandey Collaboration</p>
-                 <div class="absolute top-0 right-0 flex items-center gap-2">
+                 <div class="absolute top-0 right-0 flex items-center gap-4">
+                     <div class="hidden sm:flex items-center gap-2 text-sm font-semibold text-green-500">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                        <span id="online-users-count"></span>
+                    </div>
                     <button id="go-premium-btn" class="text-sm font-semibold bg-amber-400 text-amber-900 px-3 py-2 rounded-lg hover:bg-amber-500 transition-colors">
                         Go Premium
                     </button>
@@ -165,6 +172,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
+            // --- Online Users Counter ---
+            const onlineUsersSpan = document.getElementById('online-users-count');
+            if (onlineUsersSpan) {
+                const randomUsers = Math.floor(Math.random() * (30 - 3 + 1)) + 3;
+                onlineUsersSpan.textContent = `${randomUsers} Online`;
+            }
+
             // --- NOTIFICATION LOGIC ---
             const notificationPanel = document.getElementById('notification-panel');
             const closeNotificationBtn = document.getElementById('close-notification-btn');
@@ -590,7 +604,7 @@
                 drawSVG();updateBridge();
             };
 
-            // 6. Subscription Page
+            // 7. Subscription Page
             templates['subscription'] = `
                 <div class="bg-panel text-primary p-6 sm:p-8 rounded-2xl shadow-lg">
                     <header class="flex items-center justify-between pb-4 border-b border-main"><h1 class="text-2xl font-bold">Subscription Plans</h1><button class="back-to-menu-btn bg-control hover:bg-slate-200 dark:hover:bg-slate-600 text-control font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
@@ -631,6 +645,19 @@
                             </ul>
                             <button class="w-full mt-8 bg-amber-400 text-amber-900 font-bold py-3 px-4 rounded-lg hover:bg-amber-500 transition-colors">Choose Premium</button>
                         </div>
+                    </div>
+                </div>
+            `;
+            
+            // Profile Page
+            templates['profile'] = `
+                <div class="bg-panel text-primary p-6 sm:p-8 rounded-2xl shadow-lg">
+                    <header class="flex items-center justify-between pb-4 border-b border-main"><h1 class="text-2xl font-bold">My Progress</h1><button class="back-to-menu-btn bg-control hover:bg-slate-200 dark:hover:bg-slate-600 text-control font-semibold py-2 px-4 rounded-lg flex items-center gap-2"><i class="ph-arrow-left"></i>Back</button></header>
+                    <div id="progress-list" class="mt-8 space-y-4 max-w-2xl mx-auto">
+                        <!-- Progress items will be injected here -->
+                    </div>
+                    <div class="text-center mt-10">
+                        <button id="reset-progress-btn" class="font-semibold bg-red-100 text-red-700 px-6 py-3 rounded-lg hover:bg-red-200 transition-colors">Reset All Progress</button>
                     </div>
                 </div>
             `;
